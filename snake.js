@@ -86,6 +86,7 @@ function loop(newTime)
   update(elapsedTime);
   render(elapsedTime);
 
+  frontCtx.clearRect(0, 0, frontBuffer.width, frontBuffer.height);
   // Flip the back buffer
   frontCtx.drawImage(backBuffer, 0, 0);
 
