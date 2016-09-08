@@ -7,8 +7,24 @@ backBuffer.height = frontBuffer.height;
 var backCtx = backBuffer.getContext('2d');
 var oldTime = performance.now();
 
-var x = 0, y = 0;
+var userScore = 0;
 
+var snake = {
+  x: Math.floor(Math.random() * backBuffer.width),
+  y: Math.floor(Math.random() * backBuffer.height),
+  width: 10,
+  height: 10
+}
+
+var snakeX = new Array();
+var snakeY = new Array();
+
+var food = {
+  x:Math.floor(Math.random() * backBuffer.width),
+  y:Math.floor(Math.random() * backBuffer.height),
+  width:10,
+  height:10
+}
 
 //variable to hold the current input
 var input = {
@@ -105,56 +121,99 @@ function loop(newTime)
 function update(elapsedTime) 
 {
 
-// TODO: Spawn an apple periodically
-
-// TODO: Grow the snake periodically
-
-// Move the snake
+  // Move the snake
   if(input.up) 
   {
     if(!lastInput.down)
     {
-      y -= 1;
+      snake.y -= 2;
       clearLastInput();
       lastInput.up = true;
     }
-    else if(lastInput.down) y += 1;
+    else if(lastInput.down) snake.y += 2;
   }
 	else if(input.down) 
   {
     if(!lastInput.up)
     {
-      y += 1;
+      snake.y += 2;
       clearLastInput();
       lastInput.down = true;
     }
-    else if(lastInput.up) y -= 1;
+    else if(lastInput.up) snake.y -= 2;
   }
 	else if(input.left) 
   {
     if(!lastInput.right)
     {
-      x -= 1; 
+      snake.x -= 2; 
       clearLastInput();
       lastInput.left = true;
     }
-    else if(lastInput.right) x += 1;
+    else if(lastInput.right) snake.x += 2;
   }
 	else if(input.right) 
   {
     if(!lastInput.left)
     {
-      x += 1;      
+      snake.x += 2;      
       clearLastInput();
       lastInput.right = true;
     }
-    else if(lastInput.left) x -= 1;
+    else if(lastInput.left) snake.x -= 2;
   }
 
+  snakeX.unshift(snake.x);
+  snakeY.unshift(snake.y);
 
-  // TODO: Determine if the snake has moved out-of-bounds (offscreen)
-  // TODO: Determine if the snake has eaten an apple
+  if(snakeX.length > 1)
+  {
+    snakeX.pop();
+    snakeY.pop();
+  }
+  
+
+
+  // Determine if the snake has moved out-of-bounds (offscreen)
+  if(snake.x < backBuffer.width &&
+   snake.x + snake.width > backBuffer.width ||
+   snake.y < backBuffer.height &&
+   snake.y + snake.height > backBuffer.height || 
+   snake.x > 0 &&
+   snake.x - snake.width + 7 < 0 ||
+   snake.y > 0 &&
+   snake.y - snake.height + 7 < 0)
+   {
+     resetGame();
+   }
+
+  // Determine if the snake has eaten an apple
+  if(snake.x < food.x + food.width &&
+   snake.x + snake.width > food.x &&
+   snake.y < food.y + food.height &&
+   snake.height + snake.y > food.y)
+   {
+     userScore + 10;
+     food.x = Math.floor(Math.random() * backBuffer.width);
+     food.y = Math.floor(Math.random() * backBuffer.height);
+     for(i = 0;i<5;i++)
+     {
+       snakeX.push(snakeX[snakeX.length]);
+       snakeY.push(snakeY[snakeY.length]);
+     }
+   }
+
   // TODO: Determine if the snake has eaten its tail
+  for(i = 20;i < snakeX.length; i++)
+  {
+   if(snake.x < snakeX[i] + snake.width &&
+   snake.x + snake.width > snakeX[i] &&
+   snake.y < snakeY[i] + snake.height &&
+   snake.height + snakeY[i] > snake.y)
+   {
+     resetGame();
+   }
+  }
   // TODO: [Extra Credit] Determine if the snake has run into an obstacle
 
 }
@@ -169,10 +228,29 @@ function render(elapsedTime)
 {
   backCtx.clearRect(0, 0, backBuffer.width, backBuffer.height);
 
-  // TODO: Draw the game objects into the backBuffer
   backCtx.fillStyle = "red";
-  backCtx.fillRect(x, y, 5, 5);
+  backCtx.fillRect(food.x,food.y, food.width, food.height);
 
+  // TODO: Draw the game objects into the backBuffer
+  backCtx.fillStyle = "green";
+  var tempSanke
+  for(i = 0;i<snakeX.length;i++)
+  {
+      backCtx.fillRect(snakeX[i],snakeY[i], snake.width, snake.height)
+  }
+
+}
+
+function resetGame()
+{
+  snake.x = Math.floor(Math.random() * backBuffer.width);
+  snake.y = Math.floor(Math.random() * backBuffer.height);
+  snakeX = new Array();
+  snakeY = new Array();
+  resetInput();
+  clearLastInput();
+  food.x = Math.floor(Math.random() * backBuffer.width);
+  food.y = Math.floor(Math.random() * backBuffer.height);
 }
 
 /* Launch the game */
